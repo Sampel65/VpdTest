@@ -10,6 +10,7 @@ Features
 6.Offline Support: The app caches the repository data locally, allowing for offline access.
 7.Error Handling: The app provides proper error handling with user-friendly feedback when network requests fail.
 8.User-Friendly UI: The UI is clean, simple.
+9. Search to filter the repositories
 
 
 ![IMG_3386](https://github.com/user-attachments/assets/614b4091-7c89-4ac4-a418-25c70b6044de)
