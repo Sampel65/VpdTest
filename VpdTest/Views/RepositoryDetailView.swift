@@ -11,10 +11,19 @@ struct RepositoryDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let repository: Repository
     
+    func shareRepository() {
+        let shareText = "Check out this repository: \(repository.fullName)\nhttps://github.com/\(repository.fullName)"
+        let av = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else { return }
+        rootVC.present(av, animated: true)
+    }
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Header with navigation icons
+                // Header remains the same until share button
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
@@ -22,7 +31,7 @@ struct RepositoryDetailView: View {
                     }
                     Spacer()
                     HStack(spacing: 20) {
-                        Button(action: {}) {
+                        Button(action: shareRepository) {
                             Image(systemName: "square.and.arrow.up")
                         }
                         Button(action: {}) {

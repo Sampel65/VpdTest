@@ -1,11 +1,9 @@
-
 //
 //  NetworkService.swift
 //  VpdTest
 //
 //  Created by DevSampel on 20/03/2025.
 //
-
 
 import Foundation
 
@@ -14,6 +12,7 @@ enum NetworkError: LocalizedError {
     case noData
     case decodingError
     case serverError(String)
+    case offlineNoCache
     
     var errorDescription: String? {
         switch self {
@@ -25,6 +24,8 @@ enum NetworkError: LocalizedError {
             return "Failed to decode response"
         case .serverError(let message):
             return message
+        case .offlineNoCache:
+            return "No internet connection and no cached data available"
         }
     }
 }
@@ -32,6 +33,23 @@ enum NetworkError: LocalizedError {
 class NetworkService {
     static let shared = NetworkService()
     private init() {}
+    
+    private let cacheKey = "cached_repositories"
+    
+    private func saveToCache(_ repositories: [Repository]) {
+        if let encoded = try? JSONEncoder().encode(repositories) {
+            UserDefaults.standard.set(encoded, forKey: cacheKey)
+        }
+    }
+    
+    func loadFromCache() -> [Repository]? {
+        if let data = UserDefaults.standard.data(forKey: cacheKey) {
+            if let repositories = try? JSONDecoder().decode([Repository].self, from: data) {
+                return repositories
+            }
+        }
+        return nil
+    }
     
     func fetchRepositories(page: Int = 1, completion: @escaping (Result<[Repository], NetworkError>) -> Void) {
         guard let url = URL(string: "https://api.github.com/repositories?since=\(page * 30)") else {
@@ -44,7 +62,15 @@ class NetworkService {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                completion(.failure(.serverError(error.localizedDescription)))
+                if (error as NSError).code == NSURLErrorNotConnectedToInternet {
+                    if let cached = self.loadFromCache() {
+                        completion(.success(cached))
+                    } else {
+                        completion(.failure(.offlineNoCache))
+                    }
+                } else {
+                    completion(.failure(.serverError(error.localizedDescription)))
+                }
                 return
             }
             
@@ -58,6 +84,7 @@ class NetworkService {
             
             do {
                 let repositories = try JSONDecoder().decode([Repository].self, from: data)
+                self.saveToCache(repositories)
                 completion(.success(repositories))
             } catch {
                 completion(.failure(.decodingError))

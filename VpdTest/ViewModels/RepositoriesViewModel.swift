@@ -1,4 +1,3 @@
-
 //
 //  RepositoriesViewModel.swift
 //  VpdTest
@@ -13,6 +12,12 @@ class RepositoriesViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
     @Published var currentPage = 0
+    
+    init() {
+        if let cached = NetworkService.shared.loadFromCache() {
+            self.repositories = cached
+        }
+    }
     
     func fetchRepositories(isRefreshing: Bool = false) {
         if isRefreshing {
