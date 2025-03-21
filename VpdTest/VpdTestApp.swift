@@ -2,7 +2,7 @@
 //  VpdTestApp.swift
 //  VpdTest
 //
-//  Created by DevSampel on 23/09/2024.
+//  Created by DevSampel on 20/03/2025.
 //
 
 import SwiftUI
@@ -11,7 +11,7 @@ import SwiftUI
 struct VpdTestApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashView()
         }
     }
 }
